@@ -55,6 +55,11 @@ class AuthController extends Controller
             'message'    => 'Login berhasil!',
             'token'      => $token,
             'token_type' => 'Bearer',
+            'user'       => [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+            ],
         ]);
     }
 

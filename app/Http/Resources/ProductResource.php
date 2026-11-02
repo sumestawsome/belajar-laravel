@@ -21,10 +21,13 @@ class ProductResource extends JsonResource
             'sold_count'     => (int) $this->sold_count,
             'seller'         => $this->seller,
             'image_url'      => $this->image_url,
+            'img_url'        => $this->image_url, // Alias kompatibilitas dengan Modul BAB IV
             'description'    => $this->description,
             'category'       => [
-                'id'   => $this->category?->id,
-                'name' => $this->category?->name,
+                'id'          => $this->category?->id,
+                'category_id' => $this->category?->id,
+                'name'        => $this->category?->name,
+                'category'    => $this->category?->name,
             ],
             'created_at'     => $this->created_at,
             'updated_at'     => $this->updated_at,

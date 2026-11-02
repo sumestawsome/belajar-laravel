@@ -48,3 +48,11 @@ Thumbs.db
 _ide_helper.php
 Homestead.json
 Homestead.yaml
+
+# AI & Assistant files
+AGENTS.md
+CLAUDE.md
+
+# Non-ecommerce experimental files
+*Aduan*
+*aduan*

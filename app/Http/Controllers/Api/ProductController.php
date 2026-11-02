@@ -10,14 +10,46 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    // Ambil semua daftar produk sekalian datanya kategori
-    public function index()
+    /**
+     * Ambil daftar produk dengan dukungan filter pencarian, kategori, dan paginasi.
+     * Mendukung parameter query: ?page=1&limit=10&category_id=...&keyword=...
+     */
+    public function index(Request $request)
     {
-        $products = Product::with('category')->get();
+        $query = Product::with('category')->latest();
+
+        // 1. Filter kata kunci pencarian (nama atau deskripsi produk)
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                  ->orWhere('description', 'like', "%{$keyword}%");
+            });
+        }
+
+        // 2. Filter berdasarkan ID kategori
+        if ($request->filled('category_id') && $request->category_id !== 'all' && $request->category_id !== 'Semua') {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // 3. Batas data per halaman
+        $limit = $request->integer('limit', 10);
+        if ($limit <= 0) {
+            $limit = 10;
+        }
+
+        // Jika secara spesifik meminta seluruh produk tanpa paginasi (misal all=true)
+        if ($request->boolean('all')) {
+            return ProductResource::collection($query->get());
+        }
+
+        $products = $query->paginate($limit);
         return ProductResource::collection($products);
     }
 
-    // Simpan produk baru sekalian upload gambar kalau ada
+    /**
+     * Simpan produk baru sekalian upload gambar multipart jika ada.
+     */
     public function store(Request $request)
     {
         // 1. Validasi input form
@@ -63,13 +95,17 @@ class ProductController extends Controller
         ], 201);
     }
 
-    // Ambil detail satu produk berdasarkan ID
+    /**
+     * Ambil detail satu produk berdasarkan ID.
+     */
     public function show(Product $product)
     {
         return new ProductResource($product->load('category'));
     }
 
-    // Update data produk, termasuk ganti gambar baru jika diunggah
+    /**
+     * Update data produk, termasuk ganti gambar baru jika diunggah.
+     */
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
@@ -99,7 +135,9 @@ class ProductController extends Controller
         return new ProductResource($product->load('category'));
     }
 
-    // Hapus produk dari database
+    /**
+     * Hapus produk dari database.
+     */
     public function destroy(Product $product)
     {
         $product->delete();

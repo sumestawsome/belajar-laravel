@@ -1,12 +1,16 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
 use Illuminate\Support\Facades\Route;
 
 // 1. Endpoint publik: bisa diakses bebas tanpa token login
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Endpoint Kategori publik (Modul BAB IV Subbab 4.3.3)
+Route::get('/categories', [CategoryController::class, 'index']);
 
 // 2. Etalase publik: siapa saja boleh lihat katalog dan detail produk
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);

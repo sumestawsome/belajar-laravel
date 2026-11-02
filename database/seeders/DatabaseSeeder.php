@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,13 +16,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Membuat 1 user pengujian bawaan
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // 1. Buat akun administrator resmi TokoSaya
+        User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Administrator',
+                'password' => Hash::make('admin12345'),
+            ]
+        );
 
-        // Menjalankan seeder kategori dan produk
+        // 2. Buat akun user pengujian jika belum ada di database
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => Hash::make('password123'),
+            ]
+        );
+
+        // 3. Daftarkan seeder sesuai urutan relasi tabel
         $this->call([
             CategorySeeder::class,
             ProductSeeder::class,
