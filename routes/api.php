@@ -3,7 +3,24 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+
+// Helper untuk membuat symlink storage di server hosting (akses: GET /api/buat-symlink-storage)
+Route::get('/buat-symlink-storage', function () {
+    try {
+        Artisan::call('storage:link');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Symlink storage berhasil dibuat!'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
 
 // 1. Endpoint publik: bisa diakses bebas tanpa token login
 Route::post('/register', [AuthController::class, 'register']);
