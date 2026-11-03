@@ -18,8 +18,20 @@ class Product extends Model
         'sold_count',
         'seller',
         'image_url',
+        'img',
         'description',
     ];
+
+    // Alias atribut img agar sinkron dengan image_url
+    public function getImgAttribute()
+    {
+        return $this->attributes['image_url'] ?? null;
+    }
+
+    public function setImgAttribute($value)
+    {
+        $this->attributes['image_url'] = $value;
+    }
 
     // Setiap produk pasti punya satu kategori
     public function category()

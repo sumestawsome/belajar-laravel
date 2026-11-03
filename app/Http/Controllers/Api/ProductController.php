@@ -60,18 +60,23 @@ class ProductController extends Controller
             'price'       => 'required|numeric',
             'stock'       => 'required|integer',
             'image_url'   => 'nullable|string',
-            'img'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'img_url'     => 'nullable|string',
+            'img'         => $request->hasFile('img') ? 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048' : 'nullable|string',
         ]);
 
-        // 2. Siapkan alamat berkas gambar
-        $imageUrl = null;
+        // 2. Siapkan alamat gambar (mendukung upload file atau link URL internet)
+        $imgPath = null;
 
+        // 1. Jika ada upload file
         if ($request->hasFile('img')) {
             // Simpan gambar ke folder: storage/app/public/products
-            $path = $request->file('img')->store('products', 'public');
-            $imageUrl = url('storage/' . $path);
+            $imgPath = $request->file('img')->store('products', 'public');
+        } 
+        // 2. Jika mengirim string teks (URL link gambar seperti Unsplash)
+        elseif ($request->filled('img_url') || ($request->filled('img') && is_string($request->img))) {
+            $imgPath = $request->input('img_url') ?? $request->input('img');
         } elseif ($request->filled('image_url')) {
-            $imageUrl = $request->image_url;
+            $imgPath = $request->input('image_url');
         }
 
         // 3. Masukkan data produk ke database
@@ -85,7 +90,7 @@ class ProductController extends Controller
             'rating'         => 5.0,
             'sold_count'     => 0,
             'seller'         => 'TokoSeller.com',
-            'image_url'      => $imageUrl,
+            'image_url'      => $imgPath,
             'slug'           => Str::slug($request->name),
         ]);
 
@@ -115,14 +120,19 @@ class ProductController extends Controller
             'original_price' => 'nullable|numeric|min:0',
             'stock'          => 'sometimes|required|integer|min:0',
             'image_url'      => 'nullable|string',
+            'img_url'        => 'nullable|string',
             'description'    => 'sometimes|required|string',
-            'img'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'img'            => $request->hasFile('img') ? 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048' : 'nullable|string',
         ]);
 
-        // Simpan gambar baru jika dikirim
+        // Simpan gambar baru jika dikirim (mendukung file upload atau link URL)
         if ($request->hasFile('img')) {
             $path = $request->file('img')->store('products', 'public');
-            $validated['image_url'] = url('storage/' . $path);
+            $validated['image_url'] = $path;
+        } elseif ($request->filled('img_url') || ($request->filled('img') && is_string($request->img))) {
+            $validated['image_url'] = $request->input('img_url') ?? $request->input('img');
+        } elseif ($request->filled('image_url')) {
+            $validated['image_url'] = $request->input('image_url');
         }
 
         // Buat slug baru bila nama barang diganti
